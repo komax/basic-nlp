@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 from subprocess import call
 
@@ -19,7 +21,9 @@ def main():
         out_dir = args.output_directory
 
     if args.method == "corenlp":
-        call_corenlp(input_file=args.textfile, class_path="corenlppath", output_dir=out_dir)
+        call_corenlp(input_file=args.textfile, class_path="/Users/mk21womu/prog/stanford-corenlp-full-2018-02-27", output_dir=out_dir)
+    elif args.method == "spacy":
+        call_spacy(input_file=args.textfile, output_dir=out_dir)
     else:
         raise Exception("Not yet supported")
 
@@ -34,6 +38,10 @@ def call_corenlp(input_file, class_path, output_dir=".", is_java_8=False):
     func_call.extend(corenlp_parameters)
     print(" ".join(func_call))
     call(func_call)
+
+
+def call_spacy(input_file, output_dir="."):
+    pass
 
 
 if __name__ == "__main__":
