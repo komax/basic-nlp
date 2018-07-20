@@ -2,13 +2,14 @@
 
 import argparse
 from subprocess import call
+from calling_spacy import nlp_spacy
 
 
 def set_up_argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument('textfile', type=argparse.FileType('r'), help="input text file that will be processed")
     parser.add_argument("-o", "--output-directory", type=str, help="output directory from the nlp")
-    parser.add_argument("-m", "--method", type=str, choices=["spacy, corenlp"], default="corenlp")
+    parser.add_argument("-m", "--method", type=str, choices=["spacy", "corenlp"], default="corenlp")
     return parser
 
 
@@ -17,7 +18,7 @@ def main():
     args = parser.parse_args()
 
     out_dir = "."
-    if "output_directory" in args:
+    if args.output_directory:
         out_dir = args.output_directory
 
     if args.method == "corenlp":
@@ -41,7 +42,7 @@ def call_corenlp(input_file, class_path, output_dir=".", is_java_8=False):
 
 
 def call_spacy(input_file, output_dir="."):
-    pass
+    return nlp_spacy(input_file, output_dir)
 
 
 if __name__ == "__main__":
