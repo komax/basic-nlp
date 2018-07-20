@@ -29,10 +29,8 @@ def call_corenlp(input_file, class_path, output_dir=".", is_java_8=False):
     if not is_java_8:
         func_call.extend(["--add-modules", "java.se.ee"])
     main_class = "edu.stanford.nlp.pipeline.StanfordCoreNLP"
-    annotators = "-annotators tokenize,ssplit,pos,lemma,ner,depparse"
-    text_file = f'-file {input_file}'
-    #output_dir = f'-outputDirectory {output_dir}'
-    corenlp_parameters = [main_class, "-annotators", "tokenize,ssplit,pos,lemma,ner,depparse", '-file', input_file.name, '-outputDirectory', output_dir]
+    corenlp_parameters = [main_class, "-annotators", "tokenize,ssplit,pos,lemma,ner,depparse", '-file', input_file.name,
+                          '-outputDirectory', output_dir]
     func_call.extend(corenlp_parameters)
     print(" ".join(func_call))
     call(func_call)
