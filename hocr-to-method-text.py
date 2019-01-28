@@ -54,6 +54,29 @@ def soup_generator(hocr_files):
             yield page_soup
 
 
+def find_method_section(hocr_files):
+    method_regex = build_methods_regex()
+
+    for page_no, page_soup in enumerate(soup_generator(hocr_files)):
+        for area_no, area in enumerate(page_soup.find_all("div", "ocr_carea")):
+            for line_no, line in enumerate(area.find_all("span", "ocr_line")):
+                words = list(line.find_all("span", "ocrx_word"))
+                line_text = " ".join(map(lambda e: e.text, words))
+                match = method_regex.findall(line_text)
+
+                if match:
+                    print("Match {} found at page {} in area {} at line {}".
+                          format(match, page_no, area_no, line_no))
+                    return page_no, area_no, line_no
+
+    if not hocr_files:
+        raise RuntimeError("Directory is empty")
+
+    hocr_collection = hocr_files[0].parent
+    raise RuntimeError(
+        "Cannot find a method section in {}".format(hocr_collection))
+
+
 def main():
     parser = set_up_argparser()
     args = parser.parse_args()
@@ -61,6 +84,7 @@ def main():
     # Sort files by page number.
     hocr_files.sort(key=lambda f: int(''.join(filter(str.isdigit, f.stem))))
     print(hocr_files)
+    find_method_section(hocr_files)
 
 
 if __name__ == "__main__":
