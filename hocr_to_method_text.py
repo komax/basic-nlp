@@ -16,7 +16,8 @@ def set_up_argparser():
 
 
 def select_hocr_files(input_dir):
-    return sorted(Path(input_dir).glob('*.html'))
+    path = Path(input_dir).expanduser()
+    return sorted(path.glob('*.html'))
 
 
 stopwords = nltk.corpus.stopwords.words('english')
@@ -47,8 +48,10 @@ def build_literature_heading_regex():
     return re.compile(r'^([0-9]+.?\s*)?({})'.format("|".join(terms)))
 
 
-def soup_generator(hocr_files):
-    for hocr_file in hocr_files:
+def soup_generator(hocr_files, start_page=0):
+    for page_no, hocr_file in enumerate(hocr_files):
+        if page_no < start_page:
+            continue
         with open(hocr_file) as hocr:
             page_soup = BeautifulSoup(hocr.read(), 'html.parser')
             yield page_soup
@@ -75,6 +78,10 @@ def find_method_section(hocr_files):
     hocr_collection = hocr_files[0].parent
     raise RuntimeError(
         "Cannot find a method section in {}".format(hocr_collection))
+
+
+def collect_methods_text(hocr_files, start_tuple):
+    page_no_start, area_no_start, line_no_start = start_tuple
 
 
 def main():
