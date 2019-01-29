@@ -17,7 +17,12 @@ def set_up_argparser():
 
 def select_hocr_files(input_dir):
     path = Path(input_dir).expanduser()
-    return sorted(path.glob('*.html'))
+    selection = path.glob('*.html')
+    # Sort files by page number.
+    hocr_files = sorted(selection,
+                        key=lambda f:
+                            int(''.join(filter(str.isdigit, f.stem))))
+    return hocr_files
 
 
 stopwords = nltk.corpus.stopwords.words('english')
@@ -88,8 +93,7 @@ def main():
     parser = set_up_argparser()
     args = parser.parse_args()
     hocr_files = select_hocr_files(args.inputdir)
-    # Sort files by page number.
-    hocr_files.sort(key=lambda f: int(''.join(filter(str.isdigit, f.stem))))
+
     print(hocr_files)
     find_method_section(hocr_files)
 
