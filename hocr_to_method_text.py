@@ -63,15 +63,13 @@ def soup_generator(hocr_files, start_page=0):
             yield page_soup
 
 
-def find_method_section(hocr_files):
-    method_regex = build_methods_regex()
-
+def find_regex(hocr_files, regex):
     for page_no, page_soup in enumerate(soup_generator(hocr_files)):
         for area_no, area in enumerate(page_soup.find_all("div", "ocr_carea")):
             for line_no, line in enumerate(area.find_all("span", "ocr_line")):
                 words = list(line.find_all("span", "ocrx_word"))
                 line_text = " ".join(map(lambda e: e.text, words))
-                match = method_regex.findall(line_text)
+                match = regex.findall(line_text)
 
                 if match:
                     print("Match {} found at page {} in area {} at line {}".
@@ -83,7 +81,17 @@ def find_method_section(hocr_files):
 
     hocr_collection = hocr_files[0].parent
     raise RuntimeError(
-        "Cannot find a method section in {}".format(hocr_collection))
+        "Cannot find regex={} section in {}".format(regex, hocr_collection))
+
+
+def find_method_section(hocr_files):
+    method_regex = build_methods_regex()
+    return find_regex(hocr_files, method_regex)
+
+
+def find_method_end(hocr_files):
+    method_end_regex = build_end_methods_regex()
+    return find_regex(hocr_files, method_end_regex)
 
 
 def collect_methods_text(hocr_files, start_tuple, end_tuple):
