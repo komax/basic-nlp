@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import argparse
+import itertools
 import re
 from pathlib import Path
 
@@ -85,8 +86,48 @@ def find_method_section(hocr_files):
         "Cannot find a method section in {}".format(hocr_collection))
 
 
-def collect_methods_text(hocr_files, start_tuple):
-    page_no_start, area_no_start, line_no_start = start_tuple
+def collect_methods_text(hocr_files, start_tuple, end_tuple):
+    page_no_method_start, area_no_start, line_no_start = start_tuple
+    page_no_method_end, area_no_end, line_no_end = end_tuple
+
+    methods_text = []
+
+    soups = soup_generator(hocr_files)
+
+    # Handle start of the method section
+    start_page_areas = soups[page_no_method_start].find_all("div", "ocr_carea")
+
+    for area in itertools.islice(start_page_areas, area_no_start, None):
+        # FIXME move common code to helper function.
+        for line in area.find_all("span", "ocr_line"):
+            words = list(line.find_all("span", "ocrx_word"))
+            line_text = " ".join(map(lambda e: e.text, words))
+            methods_text.append(line_text)
+
+    # Compose entire pages between start and end of the method's section.
+    for soup in itertools.islice(soups,
+                                          page_no_method_start + 1,
+                                          page_no_method_end):
+        # TODO Skip non-textual content.
+        for area in soup.find_all("div", "ocr_carea"):
+            for line in area.find_all("span", "ocr_line"):
+                words = list(line.find_all("span", "ocrx_word"))
+                line_text = " ".join(map(lambda e: e.text, words))
+                methods_text.append(line_text)
+
+    # Compose text from last page of the methods seciton.
+    # FIXME Implement itertools.islice operation.
+
+    end_page_areas = soups[page_no_method_end].find_all("div", "ocr_carea")
+
+    for area in itertools.islice(end_page_areas, area_no_end):
+        # FIXME move common code to helper function.
+        for line in area.find_all("span", "ocr_line"):
+            words = list(line.find_all("span", "ocrx_word"))
+            line_text = " ".join(map(lambda e: e.text, words))
+            methods_text.append(line_text)
+
+    return '\n'.join(methods_text)
 
 
 def main():
