@@ -104,10 +104,13 @@ def find_method_end(hocr_files):
 
 def areas_to_text(page_soup, start=None, end=None):
     areas = page_soup.find_all("div", "ocr_carea")
-
     text_areas = []
 
     for area in itertools.islice(areas, start, end):
+        if area['ts:type'] in ['decoration', 'line', 'caption']:
+            continue
+        elif int(area['ts:table-score']) > 4:
+            continue
         for line in area.find_all("span", "ocr_line"):
             words = list(line.find_all("span", "ocrx_word"))
             line_text = " ".join(map(lambda e: e.text, words))
