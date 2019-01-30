@@ -38,20 +38,20 @@ def build_methods_regex():
              "Materials and Methods", "Study area and methods",
              "Study sites and methods", "MATERIAL AND METHODS",
              "MATERIALS AN D METHODS", "Sample sites and methods"]
-    regex = re.compile(r'^([0-9]+.?\s*)?({})'.format("|".join(terms)))
+    regex = re.compile(r'^([0-9]+.?\s*)?({})(.*)$'.format("|".join(terms)))
     return regex
 
 
 def build_end_methods_regex():
     terms = ["Discussion", "Conclusion", "Results", "Acknowledgements",
              "Appendix", "Appendices"]
-    return re.compile(r'^([0-9]+.?\s*)?({})'.format("|".join(terms)))
+    return re.compile(r'^([0-9]+.?\s*)?({})(.*)$'.format("|".join(terms)))
 
 
 def build_literature_heading_regex():
     terms = ["References", "Bibliography", "Literature", "LITERATURE",
              "REFERENCES", "R E F E R E N C E S"]
-    return re.compile(r'^([0-9]+.?\s*)?({})'.format("|".join(terms)))
+    return re.compile(r'^([0-9]+.?\s*)?({})(.*)$'.format("|".join(terms)))
 
 
 def soup_generator(hocr_files, start_page=0):
@@ -69,12 +69,20 @@ def find_regex(hocr_files, regex):
             for line_no, line in enumerate(area.find_all("span", "ocr_line")):
                 words = list(line.find_all("span", "ocrx_word"))
                 line_text = " ".join(map(lambda e: e.text, words))
-                match = regex.findall(line_text)
+                match = regex.match(line_text)
 
                 if match:
-                    print("Match {} found at page {} in area {} at line {}".
-                          format(match, page_no, area_no, line_no))
-                    return page_no, area_no, line_no
+                    pre_match, match_str, post_match = match.groups()
+                    # Check whether the whole line is text.
+                    if len(post_match.split()) > 3 or\
+                        post_match.count('.') >= 1 or\
+                        "," in post_match:
+                        # Skip the match if it occurs in plain text.
+                        pass
+                    else:
+                        #print("Match {} found at page {} in area {} at line {}".
+                        #      format(match, page_no, area_no, line_no))
+                        return page_no, area_no, line_no
 
     if not hocr_files:
         raise RuntimeError("Directory is empty")
@@ -114,7 +122,7 @@ def collect_methods_text(hocr_files, start_tuple, end_tuple):
 
     methods_text = []
 
-    soups = soup_generator(hocr_files)
+    soups = list(soup_generator(hocr_files))
 
     # Handle start of the method section
     start_page_areas = soups[page_no_method_start].find_all("div", "ocr_carea")
@@ -132,12 +140,10 @@ def collect_methods_text(hocr_files, start_tuple, end_tuple):
         # TODO Skip non-textual content.
 
     # Compose text from last page of the methods seciton.
-    # FIXME Implement itertools.islice operation.
-
     end_page_areas = soups[page_no_method_end].find_all("div", "ocr_carea")
     text_last_page = areas_to_text(soups[page_no_method_end],
                                    start=None,
-                                   end=area_no_end)
+                                   end=area_no_end + 1)
     methods_text.append(text_last_page)
 
     return '\n'.join(methods_text)
@@ -148,8 +154,11 @@ def main():
     args = parser.parse_args()
     hocr_files = select_hocr_files(args.inputdir)
 
-    print(hocr_files)
-    find_method_section(hocr_files)
+    start_method_tuple = find_method_section(hocr_files)
+    end_method_tuple = find_method_end(hocr_files)
+
+    method_text = collect_methods_text(hocr_files, start_method_tuple, end_method_tuple)
+    print(method_text)
 
 
 if __name__ == "__main__":
