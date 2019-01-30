@@ -94,6 +94,20 @@ def find_method_end(hocr_files):
     return find_regex(hocr_files, method_end_regex)
 
 
+def areas_to_text(page_soup, start=None, end=None):
+    areas = page_soup.find_all("div", "ocr_carea")
+
+    text_areas = []
+
+    for area in itertools.islice(areas, start, end):
+        for line in area.find_all("span", "ocr_line"):
+            words = list(line.find_all("span", "ocrx_word"))
+            line_text = " ".join(map(lambda e: e.text, words))
+            text_areas.append(line_text)
+
+    return '\n'.join(text_areas)
+
+
 def collect_methods_text(hocr_files, start_tuple, end_tuple):
     page_no_method_start, area_no_start, line_no_start = start_tuple
     page_no_method_end, area_no_end, line_no_end = end_tuple
@@ -105,35 +119,26 @@ def collect_methods_text(hocr_files, start_tuple, end_tuple):
     # Handle start of the method section
     start_page_areas = soups[page_no_method_start].find_all("div", "ocr_carea")
 
-    for area in itertools.islice(start_page_areas, area_no_start, None):
-        # FIXME move common code to helper function.
-        for line in area.find_all("span", "ocr_line"):
-            words = list(line.find_all("span", "ocrx_word"))
-            line_text = " ".join(map(lambda e: e.text, words))
-            methods_text.append(line_text)
+    text_first_page = areas_to_text(soups[page_no_method_start],
+                                    start=area_no_start)
+    methods_text.append(text_first_page)
 
     # Compose entire pages between start and end of the method's section.
     for soup in itertools.islice(soups,
-                                          page_no_method_start + 1,
-                                          page_no_method_end):
+                                 page_no_method_start + 1,
+                                 page_no_method_end):
+        page_text = areas_to_text(soup)
+        methods_text.append(page_text)
         # TODO Skip non-textual content.
-        for area in soup.find_all("div", "ocr_carea"):
-            for line in area.find_all("span", "ocr_line"):
-                words = list(line.find_all("span", "ocrx_word"))
-                line_text = " ".join(map(lambda e: e.text, words))
-                methods_text.append(line_text)
 
     # Compose text from last page of the methods seciton.
     # FIXME Implement itertools.islice operation.
 
     end_page_areas = soups[page_no_method_end].find_all("div", "ocr_carea")
-
-    for area in itertools.islice(end_page_areas, area_no_end):
-        # FIXME move common code to helper function.
-        for line in area.find_all("span", "ocr_line"):
-            words = list(line.find_all("span", "ocrx_word"))
-            line_text = " ".join(map(lambda e: e.text, words))
-            methods_text.append(line_text)
+    text_last_page = areas_to_text(soups[page_no_method_end],
+                                   start=None,
+                                   end=area_no_end)
+    methods_text.append(text_last_page)
 
     return '\n'.join(methods_text)
 
