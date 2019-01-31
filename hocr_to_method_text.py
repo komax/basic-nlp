@@ -32,7 +32,7 @@ stopwords = nltk.corpus.stopwords.words('english')
 def build_methods_regex():
     terms = ["Method", "METHOD", "Materials and Methods",
              "MATERIALS AND METHODS", "Materials methods",
-             "Material and methods",
+             "Material and methods", "Materials and methods",
              "Study site and methods", "Study Area and Methods",
              "M E T H O D S", "Material and Methods", "STUDY SITE AND METHODS",
              "Materials and Methods", "Study area and methods",
@@ -43,7 +43,7 @@ def build_methods_regex():
 
 
 def build_end_methods_regex():
-    terms = ["Discussion", "Conclusion", "Results", "Acknowledgements",
+    terms = ["Discussion", "Conclusion", "Results", "RESULTS", "Acknowledgements",
              "Appendix", "Appendices"]
     return re.compile(r'^([0-9]+.?\s*)?({})(.*)$'.format("|".join(terms)))
 
@@ -155,6 +155,7 @@ def collect_methods_text(hocr_files, start_tuple, end_tuple):
 def main():
     parser = set_up_argparser()
     args = parser.parse_args()
+    print(args.inputdir)
     hocr_files = select_hocr_files(args.inputdir)
 
     start_method_tuple = find_method_section(hocr_files)
