@@ -43,7 +43,8 @@ def build_methods_regex():
 
 
 def build_end_methods_regex():
-    terms = ["Discussion", "Conclusion", "Results", "RESULTS", "Acknowledgements",
+    terms = ["Discussion", "DISCUSSION", "Conclusion", "Results", "RESULTS",
+             "Resuﬂs", "Acknowledgements",
              "Appendix", "Appendices"]
     return re.compile(r'^([0-9]+.?\s*)?({})(.*)$'.format("|".join(terms)))
 
@@ -74,7 +75,7 @@ def find_regex(hocr_files, regex):
                 if match:
                     pre_match, match_str, post_match = match.groups()
                     # Check whether the whole line is text.
-                    if len(post_match.split()) > 3 or\
+                    if len(post_match.split()) > 5 or\
                         post_match.count('.') >= 1 or\
                         "," in post_match:
                         # Skip the match if it occurs in plain text.
@@ -107,10 +108,11 @@ def areas_to_text(page_soup, start=None, end=None):
     text_areas = []
 
     for area in itertools.islice(areas, start, end):
-        if area['ts:type'] in ['decoration', 'line', 'caption']:
-            continue
-        elif int(area['ts:table-score']) > 4:
-            continue
+        if area.has_attr("ts:type"):
+            if area['ts:type'] in ['decoration', 'line', 'caption']:
+                continue
+            elif int(area['ts:table-score']) > 4:
+                continue
         for line in area.find_all("span", "ocr_line"):
             words = list(line.find_all("span", "ocrx_word"))
             line_text = " ".join(map(lambda e: e.text, words))
@@ -123,13 +125,19 @@ def collect_methods_text(hocr_files, start_tuple, end_tuple):
     page_no_method_start, area_no_start, line_no_start = start_tuple
     page_no_method_end, area_no_end, line_no_end = end_tuple
 
-    methods_text = []
-
     soups = list(soup_generator(hocr_files))
 
-    # Handle start of the method section
-    start_page_areas = soups[page_no_method_start].find_all("div", "ocr_carea")
+    if page_no_method_start == page_no_method_end:
+        # Method start and end are on the same page.
+        # Slice this page accordingly.
+        methods_text = areas_to_text(soups[page_no_method_start],
+                                     area_no_start, area_no_end)
+        return methods_text
 
+    # Otherwise methods text stretches multiple pages.
+    methods_text = []
+
+    # Handle start of the method section
     text_first_page = areas_to_text(soups[page_no_method_start],
                                     start=area_no_start)
     methods_text.append(text_first_page)
@@ -142,8 +150,7 @@ def collect_methods_text(hocr_files, start_tuple, end_tuple):
         methods_text.append(page_text)
         # TODO Skip non-textual content.
 
-    # Compose text from last page of the methods seciton.
-    end_page_areas = soups[page_no_method_end].find_all("div", "ocr_carea")
+    # Compose text from last page of the methods section.
     text_last_page = areas_to_text(soups[page_no_method_end],
                                    start=None,
                                    end=area_no_end + 1)
