@@ -36,6 +36,7 @@ def build_methods_regex():
              "Study site and methods", "Study Area and Methods",
              "M E T H O D S", "Material and Methods", "STUDY SITE AND METHODS",
              "Materials and Methods", "Study area and methods",
+             "STUDY AREA AND METHODS",
              "Study sites and methods", "MATERIAL AND METHODS",
              "MATERIALS AN D METHODS", "Sample sites and methods"]
     regex = re.compile(r'^([0-9]+.?\s*)?({})(.*)$'.format("|".join(terms)))
