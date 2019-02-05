@@ -12,7 +12,7 @@ import nltk
 def set_up_argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument('inputdir', help="input directory containing hocr files")
-    parser.add_argument("-o", "--output", help="output file containing the method section")
+    parser.add_argument("-o", "--output", help="output directory for the method section")
     return parser
 
 
