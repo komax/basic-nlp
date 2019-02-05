@@ -160,6 +160,26 @@ def collect_methods_text(hocr_files, start_tuple, end_tuple):
     return '\n'.join(methods_text)
 
 
+def generate_file_from_input_dir(input_dir):
+    path_tesseract = Path(input_dir)
+    path_to_paper = path_tesseract.parent
+    paper_name = path_to_paper.stem
+    return f"{paper_name}_methods.txt"
+
+
+def write_methods_section_to_file(file_name, methods_text):
+    out_path = Path(OUT_DIR)
+    out_path.mkdir(parents=True, exist_ok=True)
+    file_path = out_path / file_name
+    print(file_path)
+    file_path.touch()
+    file_path.write_text(methods_text)
+    return
+
+
+OUT_DIR = "./output"
+
+
 def main():
     parser = set_up_argparser()
     args = parser.parse_args()
@@ -170,7 +190,14 @@ def main():
     end_method_tuple = find_method_end(hocr_files)
 
     method_text = collect_methods_text(hocr_files, start_method_tuple, end_method_tuple)
+    global OUT_DIR
+    if args.output:
+        OUT_DIR = args.output
+
+    print(OUT_DIR)
     print(method_text)
+    file_name = generate_file_from_input_dir(args.inputdir)
+    write_methods_section_to_file(file_name, method_text)
 
 
 if __name__ == "__main__":
