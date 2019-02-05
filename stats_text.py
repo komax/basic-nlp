@@ -4,9 +4,9 @@ import argparse
 import re
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+import numpy as np
 import nltk
-
-stopwords = nltk.corpus.stopwords.words('english')
 
 
 def set_up_argparser():
@@ -19,6 +19,7 @@ def set_up_argparser():
 
 
 def stopwords_per_line(words):
+    stopwords = nltk.corpus.stopwords.words('english')
     count = 0
     for word in words:
         if word in stopwords:
@@ -41,23 +42,65 @@ def generate_stats(line):
     number_alphabetic_words = alphabet_words_per_line(words)
     number_stopwords = stopwords_per_line(words)
     total_number_words = len(words)
-    return number_alphabetic_words, number_stopwords, total_number_words
+    return number_alphabetic_words - number_stopwords, number_stopwords, \
+           total_number_words - number_alphabetic_words
+#  return number_alphabetic_words, number_stopwords, total_number_words
 
 
 def parse_text(text_file_name):
     path = Path(text_file_name)
     path.expanduser()
 
+    stats_lines = []
+
     with open(path, 'r') as text_file:
-        for line in text_file:
-            print(line)
+        for i, line in enumerate(text_file):
+            stats_line = generate_stats(line)
+            stats_lines.append(stats_line)
+            print(f"{i}:{line}")
             print(generate_stats(line))
+            # if stats_line[0] == 0 == stats_line[1]:
+            #     print(f"{i}:{line}")
+            #     print(generate_stats(line))
+    return stats_lines
+
+
+def plot_statistics(stats_lines, plot_name=None):
+    line_numbers = list(range(0, len(stats_lines), 5))
+    print(line_numbers)
+    # alphabetic_words = list(map(lambda elem: elem[0] - elem[1], stats_lines))
+    # stopwords = list(map(lambda elem: elem[1], stats_lines))
+    # nonalphabetic_words = list(
+    #     map(lambda elem: elem[2] - elem[0], stats_lines))
+    # total_number_words = list(map(lambda elem: elem[2], stats_lines))
+
+    stats = np.array(stats_lines)
+    print(stats.shape)
+
+    number_bins = round(len(stats_lines)/5)
+    print(number_bins)
+
+    fig = plt.figure()
+    plt.hist(stats, histtype='bar')
+    #plt.stackplot(line_numbers, alphabetic_words, stopwords,
+    #              nonalphabetic_words)
+    # plt.plot(line_numbers, alphabetic_words, label='# alphabetic words')
+    # plt.plot(line_numbers, stopwords, label='# stopwords')
+    # plt.plot(line_numbers, total_number_words, label='# words')
+
+    plt.legend()
+
+    plt.show()
+    plt.close(fig)
+    # fig.savefig(plot_name, bbox_inches='tight')
+    return
 
 
 def main():
     parser = set_up_argparser()
     args = parser.parse_args()
-    parse_text(args.inputfile)
+    stats = parse_text(args.inputfile)
+    plot_statistics(stats)
 
 
 if __name__ == "__main__":
