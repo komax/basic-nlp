@@ -65,34 +65,53 @@ def parse_text(text_file_name):
     return stats_lines
 
 
-def plot_statistics(stats_lines, plot_name=None):
-    line_numbers = list(range(0, len(stats_lines), 5))
-    print(line_numbers)
+def plot_histogram(stats_lines, axis):
+    axis.set_title('word lengths as a stacked histogram')
+    number_bins = round(len(stats_lines)/5)
+    print(number_bins)
+
+    stats = np.array(stats_lines)
+    print(stats.shape)
+
+    #plt.hist(stats, histtype='bar')
+
+
+def plot_stacked_graph(stats_lines, axis):
+    axis.set_title('Distribution of words as a stacked graph')
+    #plt.stackplot(line_numbers, alphabetic_words, stopwords,
+    #              nonalphabetic_words)
+
+
+def plot_index_graph(stats_lines, axis):
+    axis.set_title('Line chart for word distribution')
+    # plt.plot(line_numbers, alphabetic_words, label='# alphabetic words')
+    # plt.plot(line_numbers, stopwords, label='# stopwords')
+    # plt.plot(line_numbers, total_number_words, label='# words')
+
     # alphabetic_words = list(map(lambda elem: elem[0] - elem[1], stats_lines))
     # stopwords = list(map(lambda elem: elem[1], stats_lines))
     # nonalphabetic_words = list(
     #     map(lambda elem: elem[2] - elem[0], stats_lines))
     # total_number_words = list(map(lambda elem: elem[2], stats_lines))
 
-    stats = np.array(stats_lines)
-    print(stats.shape)
 
-    number_bins = round(len(stats_lines)/5)
-    print(number_bins)
+def plot_statistics(stats_lines, plot_name):
+    fig, axes = plt.subplots(nrows=3, ncols=1)
 
-    fig = plt.figure()
-    plt.hist(stats, histtype='bar')
-    #plt.stackplot(line_numbers, alphabetic_words, stopwords,
-    #              nonalphabetic_words)
-    # plt.plot(line_numbers, alphabetic_words, label='# alphabetic words')
-    # plt.plot(line_numbers, stopwords, label='# stopwords')
-    # plt.plot(line_numbers, total_number_words, label='# words')
+    axis0, axis1, axis2 = axes.flatten()
 
-    plt.legend()
+    plot_histogram(stats_lines, axis0)
+    plot_stacked_graph(stats_lines, axis1)
+    plot_index_graph(stats_lines, axis2)
 
-    plt.show()
-    plt.close(fig)
-    # fig.savefig(plot_name, bbox_inches='tight')
+    line_numbers = list(range(0, len(stats_lines), 5))
+    print(line_numbers)
+
+    fig.tight_layout()
+    fig.savefig(plot_name, bbox_inches='tight')
+
+    #plt.show()
+    #plt.close(fig)
     return
 
 
@@ -100,7 +119,10 @@ def main():
     parser = set_up_argparser()
     args = parser.parse_args()
     stats = parse_text(args.inputfile)
-    plot_statistics(stats)
+    outfile = "word_statistics.png"
+    if args.output:
+        outfile = args.output
+    plot_statistics(stats, plot_name=outfile)
 
 
 if __name__ == "__main__":
