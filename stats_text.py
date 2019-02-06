@@ -62,29 +62,37 @@ def parse_text(text_file_name):
             # if stats_line[0] == 0 == stats_line[1]:
             #     print(f"{i}:{line}")
             #     print(generate_stats(line))
-    return stats_lines
+    stats = np.array(stats_lines)
+    return stats
 
 
 def plot_histogram(stats_lines, axis):
     axis.set_title('word lengths as a stacked histogram')
     axis.margins(x=0)
-    number_bins = round(len(stats_lines)/5)
+    number_bins = round(len(stats_lines)/255)
     print(number_bins)
 
     stats = np.array(stats_lines)
-    print(stats.shape)
 
-    axis.hist(stats, histtype='bar')
+
+    print(stats)
+    total_words = stats.sum(axis=1)
+    print(total_words)
+    print(stats.shape)
+    bins = np.arange(total_words.min(), total_words.max(), step=1)
+    print(bins)
+
+    axis.hist(stats[:], bins, histtype='barstacked')
 
 
 def plot_stacked_graph(stats_lines, axis):
     axis.set_title('Distribution of words as a stacked graph')
     axis.margins(x=0)
-    line_numbers = list(range(0, len(stats_lines)))
-    alphabetic_words = list(map(lambda elem: elem[0], stats_lines))
-    stopwords = list(map(lambda elem: elem[1], stats_lines))
-    nonalphabetic_words = list(
-        map(lambda elem: elem[2], stats_lines))
+    rows, cols = stats_lines.shape
+    line_numbers = np.arange(start=0, stop=rows, step=1)
+    alphabetic_words = stats_lines[:, 0]
+    stopwords = stats_lines[:, 1]
+    nonalphabetic_words = stats_lines[:, 2]
     # total_number_words = list(map(lambda elem: elem[2], stats_lines))
 
     legends = ['# alphabetic words', '# stopwords', '# non-alphabetic words']
@@ -96,11 +104,11 @@ def plot_stacked_graph(stats_lines, axis):
 def plot_index_graph(stats_lines, axis):
     axis.set_title('Line chart for word distribution')
     axis.margins(x=0)
-    line_numbers = list(range(0, len(stats_lines)))
-    alphabetic_words = list(map(lambda elem: elem[0], stats_lines))
-    stopwords = list(map(lambda elem: elem[1], stats_lines))
-    total_number_words = list(
-        map(lambda elem: elem[0] + elem[1] + elem[2], stats_lines))
+    rows, cols = stats_lines.shape
+    line_numbers = np.arange(start=0, stop=rows, step=1)
+    alphabetic_words = stats_lines[:, 0]
+    stopwords = stats_lines[:, 1]
+    total_number_words = stats_lines.sum(axis=1)
 
     axis.plot(line_numbers, alphabetic_words, label='# alphabetic words')
     axis.plot(line_numbers, stopwords, label='# stopwords')
@@ -122,9 +130,6 @@ def plot_statistics(stats_lines, plot_name):
     plot_histogram(stats_lines, axis0)
     plot_stacked_graph(stats_lines, axis1)
     plot_index_graph(stats_lines, axis2)
-
-    line_numbers = list(range(0, len(stats_lines), 5))
-    print(line_numbers)
 
     fig.tight_layout()
     fig.savefig(plot_name, bbox_inches='tight')
