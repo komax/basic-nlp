@@ -73,20 +73,33 @@ def plot_histogram(stats_lines, axis):
     stats = np.array(stats_lines)
     print(stats.shape)
 
-    #plt.hist(stats, histtype='bar')
+    axis.hist(stats, histtype='bar')
 
 
 def plot_stacked_graph(stats_lines, axis):
     axis.set_title('Distribution of words as a stacked graph')
-    #plt.stackplot(line_numbers, alphabetic_words, stopwords,
-    #              nonalphabetic_words)
+    line_numbers = list(range(0, len(stats_lines)))
+    alphabetic_words = list(map(lambda elem: elem[0], stats_lines))
+    stopwords = list(map(lambda elem: elem[1], stats_lines))
+    nonalphabetic_words = list(
+        map(lambda elem: elem[2], stats_lines))
+    # total_number_words = list(map(lambda elem: elem[2], stats_lines))
+
+    axis.stackplot(line_numbers, alphabetic_words, stopwords, nonalphabetic_words)
 
 
 def plot_index_graph(stats_lines, axis):
     axis.set_title('Line chart for word distribution')
-    # plt.plot(line_numbers, alphabetic_words, label='# alphabetic words')
-    # plt.plot(line_numbers, stopwords, label='# stopwords')
-    # plt.plot(line_numbers, total_number_words, label='# words')
+    line_numbers = list(range(0, len(stats_lines)))
+    alphabetic_words = list(map(lambda elem: elem[0], stats_lines))
+    stopwords = list(map(lambda elem: elem[1], stats_lines))
+    total_number_words = list(
+        map(lambda elem: elem[0] + elem[1] + elem[2], stats_lines))
+
+    axis.plot(line_numbers, alphabetic_words, label='# alphabetic words')
+    axis.plot(line_numbers, stopwords, label='# stopwords')
+    axis.plot(line_numbers, total_number_words, label='# words')
+    axis.legend(prop={'size': 7})
 
     # alphabetic_words = list(map(lambda elem: elem[0] - elem[1], stats_lines))
     # stopwords = list(map(lambda elem: elem[1], stats_lines))
