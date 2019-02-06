@@ -67,6 +67,7 @@ def parse_text(text_file_name):
 
 def plot_histogram(stats_lines, axis):
     axis.set_title('word lengths as a stacked histogram')
+    axis.margins(x=0)
     number_bins = round(len(stats_lines)/5)
     print(number_bins)
 
@@ -78,6 +79,7 @@ def plot_histogram(stats_lines, axis):
 
 def plot_stacked_graph(stats_lines, axis):
     axis.set_title('Distribution of words as a stacked graph')
+    axis.margins(x=0)
     line_numbers = list(range(0, len(stats_lines)))
     alphabetic_words = list(map(lambda elem: elem[0], stats_lines))
     stopwords = list(map(lambda elem: elem[1], stats_lines))
@@ -85,11 +87,15 @@ def plot_stacked_graph(stats_lines, axis):
         map(lambda elem: elem[2], stats_lines))
     # total_number_words = list(map(lambda elem: elem[2], stats_lines))
 
-    axis.stackplot(line_numbers, alphabetic_words, stopwords, nonalphabetic_words)
+    legends = ['# alphabetic words', '# stopwords', '# non-alphabetic words']
+    axis.stackplot(line_numbers, alphabetic_words, stopwords,
+                   nonalphabetic_words, labels=legends)
+    axis.legend(prop={'size': 7})
 
 
 def plot_index_graph(stats_lines, axis):
     axis.set_title('Line chart for word distribution')
+    axis.margins(x=0)
     line_numbers = list(range(0, len(stats_lines)))
     alphabetic_words = list(map(lambda elem: elem[0], stats_lines))
     stopwords = list(map(lambda elem: elem[1], stats_lines))
