@@ -69,20 +69,9 @@ def parse_text(text_file_name):
 def plot_histogram(stats_lines, axis):
     axis.set_title('word lengths as a stacked histogram')
     axis.margins(x=0)
-    number_bins = round(len(stats_lines)/255)
-    print(number_bins)
-
-    stats = np.array(stats_lines)
-
-
-    print(stats)
-    total_words = stats.sum(axis=1)
-    print(total_words)
-    print(stats.shape)
-    bins = np.arange(total_words.min(), total_words.max(), step=1)
-    print(bins)
-
-    axis.hist(stats[:], bins, histtype='barstacked')
+    rows, cols = stats_lines.shape
+    line_numbers = np.arange(start=0, stop=rows, step=1)
+    axis.hist2d(line_numbers, stats_lines[:, 1], bins=11)
 
 
 def plot_stacked_graph(stats_lines, axis):
