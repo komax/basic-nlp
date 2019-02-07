@@ -14,7 +14,7 @@ def set_up_argparser():
     parser.add_argument('inputfile',
                         help="input text file")
     parser.add_argument("-o", "--output",
-                        help="output file")
+                        help="output directory")
     return parser
 
 
@@ -128,13 +128,29 @@ def plot_statistics(stats_lines, plot_name):
     return
 
 
+def png_name_from_inputfile(inputfile_name):
+    path = Path(inputfile_name)
+    return f"{path.stem}_stats.png"
+
+
+def output_file_path(input_file, out_dir):
+    out_path = Path(out_dir)
+    out_path.expanduser()
+    out_path.mkdir(parents=True, exist_ok=True)
+    out_file_path = out_path / png_name_from_inputfile(input_file)
+    return out_file_path
+
+
 def main():
     parser = set_up_argparser()
     args = parser.parse_args()
-    stats = parse_text(args.inputfile)
-    outfile = "word_statistics.png"
+    input_file = args.inputfile
+    stats = parse_text(input_file)
+    outdir = "stats"
     if args.output:
-        outfile = args.output
+        outdir = args.output
+
+    outfile = output_file_path(input_file, outdir)
     plot_statistics(stats, plot_name=outfile)
 
 
