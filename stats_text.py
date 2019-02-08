@@ -67,7 +67,9 @@ def parse_text(text_file_name):
 
 
 def plot_histogram(stats_lines, axis):
-    axis.set_title('word lengths as a stacked histogram')
+    axis.set_title('Stopwords per line as stacked histogram')
+    axis.set_xlabel('Line number')
+    axis.set_ylabel('# stopwords per line')
     axis.margins(x=0)
     rows, cols = stats_lines.shape
     line_numbers = np.arange(start=0, stop=rows, step=1)
@@ -75,7 +77,9 @@ def plot_histogram(stats_lines, axis):
 
 
 def plot_stacked_graph(stats_lines, axis):
-    axis.set_title('Distribution of words as a stacked graph')
+    axis.set_title('Distribution of words per line as a stacked graph')
+    axis.set_xlabel('Line number')
+    axis.set_ylabel('# words per line')
     axis.margins(x=0)
     rows, cols = stats_lines.shape
     line_numbers = np.arange(start=0, stop=rows, step=1)
@@ -91,7 +95,9 @@ def plot_stacked_graph(stats_lines, axis):
 
 
 def plot_index_graph(stats_lines, axis):
-    axis.set_title('Line chart for word distribution')
+    axis.set_title('Line chart for words per line')
+    axis.set_xlabel('Line number')
+    axis.set_ylabel('# words per line')
     axis.margins(x=0)
     rows, cols = stats_lines.shape
     line_numbers = np.arange(start=0, stop=rows, step=1)
@@ -99,9 +105,11 @@ def plot_index_graph(stats_lines, axis):
     stopwords = stats_lines[:, 1]
     total_number_words = stats_lines.sum(axis=1)
 
-    axis.plot(line_numbers, alphabetic_words, label='# alphabetic words')
-    axis.plot(line_numbers, stopwords, label='# stopwords')
-    axis.plot(line_numbers, total_number_words, label='# words')
+    axis.plot(line_numbers, total_number_words, label='# words', color='tab:green')
+    axis.plot(line_numbers, alphabetic_words, label='# alphabetic words', color='tab:blue')
+    axis.plot(line_numbers, stopwords, label='# stopwords', color='tab:orange')
+
+
     axis.legend(prop={'size': 7})
 
     # alphabetic_words = list(map(lambda elem: elem[0] - elem[1], stats_lines))
