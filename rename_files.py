@@ -27,8 +27,16 @@ def transform_file_name(path):
         .replace("(", "").replace(")", "")
 
 
+def renamed_file_name(path):
+    file_name = path.resolve().name
+    replaced_name = file_name.replace(" ", "_").replace("'", "").replace(",", "")\
+        .replace("(", "").replace(")", "")
+    alphanum_name = ''.join(filter(lambda c: str.isalnum(c) or c in ['_', '.', '-'], replaced_name))
+    return alphanum_name
+
+
 def rename_file(file, out_dir):
-    file_name = transform_file_name(file)
+    file_name = renamed_file_name(file)
     out_file_name = out_dir / file_name
     copyfile(file, out_file_name)
 
